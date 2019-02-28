@@ -34,7 +34,7 @@ struct Constraint {
 // Parameters: used to influence various steps
 struct Parameters {
 	//stitch size in millimeters:
-	float stitch_width_mm = 0.5f;
+	float stitch_width_mm = 1.0f;
 	float stitch_height_mm = 0.4f;
 
 	//model unit size in millimeters:
