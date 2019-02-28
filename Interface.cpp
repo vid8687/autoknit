@@ -16,6 +16,9 @@
 #include <algorithm>
 #include <unordered_set>
 
+float drawing_scale = 1.f;
+float scale_inc = 0.5f;
+
 //given normalized 0..1 time:
 glm::vec3 time_color(float time) {
 	const constexpr size_t Size = 3;
@@ -567,6 +570,7 @@ void Interface::draw() {
 		glBindVertexArray(sphere_tristrip_for_marker_draw->array);
 
 		auto sphere = [&](glm::vec3 const &at, float r, glm::vec3 const &color, glm::u8vec4 const &id) {
+			r = r * drawing_scale;
 			//Position-to-light matrix:
 			glm::mat4x3 p2l = glm::mat4x3(
 				glm::vec3(r, 0.0f, 0.0f),
@@ -998,6 +1002,15 @@ void Interface::handle_event(SDL_Event const &evt) {
 				constraints[hovered.cons].value -= 0.1f;
 				constraints_dirty = true;
 			}
+		} else if (evt.key.keysym.scancode == SDL_SCANCODE_UP){
+			drawing_scale += scale_inc;
+			constraints_tristrip_dirty = true;
+			rowcol_graph_tristrip_dirty = true;
+		} else if (evt.key.keysym.scancode == SDL_SCANCODE_DOWN){
+			drawing_scale -= scale_inc;
+			drawing_scale = std::max(scale_inc, drawing_scale); 
+			constraints_tristrip_dirty = true;
+			rowcol_graph_tristrip_dirty = true;
 		}
 	}
 }
@@ -1391,7 +1404,7 @@ static void make_sphere(
 	std::vector< GLAttribBuffer< glm::vec3, glm::vec3, glm::u8vec4 >::Vertex > *attribs,
 	glm::vec3 const &c, float r, glm::u8vec4 const &color ) {
 	assert(attribs);
-
+	r = r * drawing_scale;
 	const constexpr uint32_t Slices = 14;
 	const constexpr uint32_t Rings = 8;
 	static glm::vec2 Ring[Slices];
@@ -1438,6 +1451,8 @@ static void make_tube(
 	glm::vec3 const &a, glm::vec3 const &b, float r, glm::u8vec4 const &color ) {
 	assert(attribs);
 
+	r = r * drawing_scale;
+	
 	static std::vector< glm::vec2 > circle = [](){
 		const constexpr uint32_t Angles = 16;
 		std::vector< glm::vec2 > ret;
@@ -1693,9 +1708,9 @@ void Interface::update_rowcol_graph_tristrip() {
 		locations.emplace_back(v.at.interpolate(constrained_model.vertices));
 	}
 	//vertices:
-	float row_r = 0.075f * parameters.stitch_width_mm / parameters.model_units_mm;
+	float row_r = 0.0075f * parameters.stitch_width_mm / parameters.model_units_mm;
 	float col_r = row_r;
-	float stitch_r = 1.5f * row_r;
+	float stitch_r = .15f * row_r;
 	#define COL(H) glm::u8vec4(uint32_t(H) >> 24, uint32_t(H) >> 16, uint32_t(H) >> 8, uint32_t(H))
 	for (uint32_t vi = 0; vi < rowcol_graph.vertices.size(); ++vi) {
 		make_sphere(&attribs,

@@ -653,17 +653,17 @@ void ak::embed_constraints(
 			if (i == 0) first = a;
 			if (i + 2 == embedded_chains[c].size()) last = b;
 		}
-		if (first != last) std::cout << "NOTE: have open chain." << std::endl;
+		//if (first != last) std::cout << "NOTE: have open chain." << std::endl;
 	}
 	uint32_t total_simplex_edges = 0;
 	for (const auto &edges : epm.simplex_edges) {
 		total_simplex_edges += edges.second.size();
 	}
+	/*//DEBUG:
 	std::cout << "EPM has " << epm.vertices.size() << " vertices." << std::endl;
 	std::cout << "EPM has " << epm.simplex_vertices.size() << " simplices with vertices." << std::endl;
 	std::cout << "EPM has " << epm.simplex_edges.size() << " simplices with edges (" << total_simplex_edges << " edges from " << total_chain_edges << " chain edges)." << std::endl;
 
-	/*//DEBUG:
 	for (const auto &se : epm.simplex_edges) {
 		assert(se.first.x <= se.first.y && se.first.y <= se.first.z);
 		if (se.first.z != -1U) {
