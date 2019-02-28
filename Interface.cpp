@@ -1337,7 +1337,7 @@ void Interface::update_traced() {
 	//I guess just update from current rowcol graph, whatever that may be
 	traced_dirty = false;
 
-	ak::trace_graph(rowcol_graph, &traced, &constrained_model);
+	ak::trace_graph(parameters, rowcol_graph, &traced, &constrained_model);
 
 	save_traced();
 
@@ -1915,7 +1915,7 @@ void Interface::update_traced_tristrip() {
 		}
 		make_tube(&attribs,
 			traced[ti-1].at, traced[ti].at,
-			0.01f,
+			0.1f,
 			yarn_colors[yarn_color]);
 	}
 	for (uint32_t ti = 0; ti < traced.size(); ++ti) {
@@ -1923,22 +1923,22 @@ void Interface::update_traced_tristrip() {
 		if (traced[ti].ins[0] != -1U && traced[ti].ins[1] != -1U) {
 			glm::vec3 const &in0 = traced[traced[ti].ins[0]].at;
 			glm::vec3 const &in1 = traced[traced[ti].ins[1]].at;
-			make_tube(&attribs, 0.5f * (at + in0), at, 0.005f, glm::u8vec4(0x55, 0x55, 0x55, 0xff));
-			make_tube(&attribs, 0.5f * (at + in1), at, 0.005f, glm::u8vec4(0xcc, 0xcc, 0xcc, 0xff));
+			make_tube(&attribs, 0.5f * (at + in0), at, 0.05f, glm::u8vec4(0x55, 0x55, 0x55, 0xff));
+			make_tube(&attribs, 0.5f * (at + in1), at, 0.05f, glm::u8vec4(0xcc, 0xcc, 0xcc, 0xff));
 		}
 		if (traced[ti].outs[0] != -1U && traced[ti].outs[1] != -1U) {
 			glm::vec3 const &out0 = traced[traced[ti].outs[0]].at;
 			glm::vec3 const &out1 = traced[traced[ti].outs[1]].at;
-			make_tube(&attribs,at, 0.5f * (at + out0), 0.005f, glm::u8vec4(0x44, 0x44, 0x44, 0xff));
-			make_tube(&attribs,at, 0.5f * (at + out1), 0.005f, glm::u8vec4(0xbb, 0xbb, 0xbb, 0xff));
+			make_tube(&attribs,at, 0.5f * (at + out0), 0.05f, glm::u8vec4(0x44, 0x44, 0x44, 0xff));
+			make_tube(&attribs,at, 0.5f * (at + out1), 0.05f, glm::u8vec4(0xbb, 0xbb, 0xbb, 0xff));
 		}
 		if (traced[ti].ins[0] != -1U && traced[ti].ins[1] == -1U) {
 			glm::vec3 const &in0 = traced[traced[ti].ins[0]].at;
-			make_tube(&attribs, 0.5f * (at + in0), at, 0.005f, glm::u8vec4(0x88, 0x88, 0x88, 0xff));
+			make_tube(&attribs, 0.5f * (at + in0), at, 0.05f, glm::u8vec4(0x88, 0x88, 0x88, 0xff));
 		}
 		if (traced[ti].outs[0] != -1U && traced[ti].outs[1] == -1U) {
 			glm::vec3 const &out0 = traced[traced[ti].outs[0]].at;
-			make_tube(&attribs, at, 0.5f * (at + out0), 0.005f, glm::u8vec4(0x77, 0x77, 0x77, 0xff));
+			make_tube(&attribs, at, 0.5f * (at + out0), 0.05f, glm::u8vec4(0x77, 0x77, 0x77, 0xff));
 		}
 		assert(!(traced[ti].ins[0] == -1U && traced[ti].ins[1] != -1U));
 		assert(!(traced[ti].outs[0] == -1U && traced[ti].outs[1] != -1U));

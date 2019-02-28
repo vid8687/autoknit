@@ -3,6 +3,7 @@
 #include <iostream>
 
 void ak::trace_graph(
+	Parameters const &parameters,
 	ak::RowColGraph const &graph, //in: row-column graph
 	std::vector< ak::TracedStitch > *traced_, //out:traced list of stitches
 	ak::Model *DEBUG_model_ //in (optional): model
@@ -115,7 +116,7 @@ void ak::trace_graph(
 		auto make_stitch = [&](uint32_t next, ak::TracedStitch::Type type) {
 
 			//DEBUG:
-			std::cout << "Make " << char(type) << " at " << next; std::cout.flush(); //DEBUG
+			//std::cout << "Make " << char(type) << " at " << next; std::cout.flush(); //DEBUG
 
 			at = next;
 
@@ -532,7 +533,7 @@ void ak::trace_graph(
 		for (auto &ts : traced) {
 			uint32_t i = index[&ts - &traced[0]];
 			float amt = float(i + 0.5f) / float(count[ts.vertex]);
-			amt = 0.1f * (2.0f * (amt - 0.5f));
+			amt =  parameters.stitch_height_mm * (0.5 +  (2.0f * (amt - 0.5f)));
 			ts.at = at[ts.vertex] + amt * up[ts.vertex];
 		}
 	}
