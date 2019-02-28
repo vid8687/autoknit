@@ -478,7 +478,7 @@ void Interface::draw() {
 	glBindFramebuffer(GL_FRAMEBUFFER, color_id_fb);
 
 	{
-		glClearColor(0.9, 0.9, 0.9, 0.0);
+		glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		GLfloat zeros[4] = {0.0f, 0.0f, 0.0f, 0.0f};

@@ -258,12 +258,12 @@ int main(int argc, char **argv) {
 			}
 
 			/*{ //DEBUG
-				std::cout << "  in:";
+				std::cout << "  in-chain:";
 				for (auto const &l : in_chain) {
 					std::cout << " " << l.to_string();
 				}
 				std::cout << '\n';
-				std::cout << "  out:";
+				std::cout << "  out-chain:";
 				for (auto const &l : out_chain) {
 					std::cout << " " << l.to_string();
 				}
@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 
 				//flip and re-jigger yarn storages:
 				auto link_ccw = [&outs](Loop const &a, Loop const &b) {
-					//std::cout << "Linking " << a.to_string() << " -> " << b.to_string() << std::endl; //DEBUG
+					std::cout << "Linking " << a.to_string() << " -> " << b.to_string() << std::endl; //DEBUG
 					std::list< Storage >::iterator sa = outs.end();
 					uint32_t la = -1U;
 					std::list< Storage >::iterator sb = outs.end();
@@ -321,7 +321,6 @@ int main(int argc, char **argv) {
 					}
 					assert(sa != outs.end() && la < sa->size());
 					assert(sb != outs.end() && lb < sb->size());
-
 					if (sa == sb) {
 						if ((la + 1) % sa->size() == lb) {
 							//already ccw! great.
@@ -1033,10 +1032,11 @@ int main(int argc, char **argv) {
 	//Figure out possible shapes for storages near *boring* steps:
 	std::cout << "Figuring out shapes for boring steps:" << std::endl; //DEBUG
 	for (auto &step : steps) {
+		std::cout <<"step = " << &step - &steps[0] << std::endl;
 		if (!(step.in.size() <= 1 && step.out.size() <= 1)) continue; //skip exciting steps
-
 		uint32_t inter_roll = 0; //such that: storages[step.in[0]][i] == step.inter[i + inter_roll]
 		//used to fix up inter_shape relative to in_shape so the stitches are in the same places.
+		//
 		if (step.in.size() == 1) {
 			assert(step.inter.size() == storages[step.in[0]].size());
 			inter_roll = -1U;
@@ -1049,6 +1049,7 @@ int main(int argc, char **argv) {
 			assert(inter_roll != -1U);
 			for (uint32_t i = 0; i < step.inter.size(); ++i) {
 				assert(storages[step.in[0]][i] == step.inter[(i + inter_roll) % step.inter.size()]);
+				
 			}
 		} else {
 			assert(step.inter.empty());
@@ -1117,7 +1118,7 @@ int main(int argc, char **argv) {
 					option.cost = ScheduleCost::shape_cost(in_shape);
 					option.cost += ScheduleCost::shape_cost(out_shape);
 					option.cost += ScheduleCost::transfer_cost(
-						step.inter.size(), in_shape,
+						step.inter.size(), inter_shape,
 						storages[step.out[0]].size(), out_shape,
 						step.inter_to_out
 					);
@@ -1733,7 +1734,7 @@ int main(int argc, char **argv) {
 		instructions.emplace_back(instr);
 		std::cout << instr << std::endl; //DEBUG
 	};
-	add_instr("const autoknit = require('./autoknit.js');");
+	add_instr("const autoknit = require('autoknit');");
 	add_instr("let h = new autoknit.Helpers;");
 
 	//helper:
@@ -1847,7 +1848,7 @@ int main(int argc, char **argv) {
 		}
 	};
 
-	auto make_xfers = [&loop_to_bn,&typeset_bed_needle](std::vector< BedNeedle > const &from, std::vector< BedNeedle > const &to, Storage const &loops) {
+	auto make_xfers = [&loop_to_bn](std::vector< BedNeedle > const &from, std::vector< BedNeedle > const &to, Storage const &loops) {
 		assert(from.size() == loops.size());
 		assert(to.size() == loops.size());
 		for (uint32_t li = 0; li < loops.size(); ++li) {
@@ -2234,7 +2235,7 @@ int main(int argc, char **argv) {
 	std::unordered_map< Storage const *, std::pair< int32_t, Shape > > storage_layouts; //<-- is this really needed?
 	for (uint32_t stepi = 0; stepi < steps.size(); ++stepi) {
 
-		auto check_storage_layout = [&loop_to_bn,&typeset_bed_needle](Storage const &storage, int32_t left, Shape const &shape) {
+		auto check_storage_layout = [&loop_to_bn](Storage const &storage, int32_t left, Shape const &shape) {
 			bool front_stashed = false;
 			bool front_unstashed = false;
 			bool back_stashed = false;
@@ -2375,7 +2376,9 @@ int main(int argc, char **argv) {
 				if (left == std::numeric_limits< int32_t >::max()) left = pos;
 				assert(left == pos);
 			}
-			return step_left + left;
+		//	return step_left + left;
+		//  step needle already included step left, don't double count
+			return left;
 		};
 
 		{ //reshape to get ready for step -- shift everything to the correct offset and (maybe) also transform some things:
@@ -2801,7 +2804,8 @@ int main(int argc, char **argv) {
 				Constraints constraints;
 				constraints.min_free = std::max(left_max + shift_left, used_min - 20);
 				constraints.max_free = std::min(right_min + shift_right, used_max + 20);
-				constraints.max_racking = 4;
+				// with half-gauging max racking 4 can cause a real racking of 9
+				constraints.max_racking = 3;
 
 				std::vector< Slack > slack;
 				slack.reserve(from.size());
